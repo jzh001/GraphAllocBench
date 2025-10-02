@@ -1,0 +1,12 @@
+architecture_idx: 0
+clip_range: 0.192598707751421
+entropy: 0.0623605586845633
+env_name: problem_5e
+lr: 9.869332000412336e-05
+n_epochs: 20
+n_steps: 2048
+scalarization_method: smooth_tchebycheff
+seed: 42
+smoothness: 0.0640933141370918
+target_kl: 0.0160389071160549
+total_timesteps: 2000000

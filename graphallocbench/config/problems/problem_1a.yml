@@ -1,0 +1,33 @@
+resource_count: 2
+demand_count: 2
+demands: [10, 10]
+avail_resources: [15, 15]
+weights:
+  type: uniform # fixed, uniform
+  alpha: 1
+dependencies: [[0, 0], [0, 1], [1, 0], [1, 1]] # [[demand, resource], ...]
+objectives:
+  - type: eval_production
+    params:
+      - outer_op: min
+        a: {y: 0, y_inv: 0, constant: 0.6}
+        k: {y: 0, y_inv: 0, constant: 18}
+      - outer_op: max
+        rho: {y: 0, y_inv: 0, constant: 5}
+        phi: {y: 0, y_inv: 0, constant: 0.9}
+        mu: {y: 0, y_inv: 0, constant: 7}
+        k: {y: 0, y_inv: 0, constant: 0.1}
+  - type: eval_production
+    params:
+      - outer_op: max
+        a: {y: 0, y_inv: 0, constant: -1.5}
+        b: {y: 0, y_inv: 0, constant: 0.8}
+        c: {y: 0, y_inv: 0, constant: 12}
+        k: {y: 0, y_inv: 0, constant: 0}
+      - outer_op: none
+        rho: {y: 0, y_inv: 0, constant: 5}
+        phi: {y: 0, y_inv: 0, constant: 0.1}
+        mu: {y: 0, y_inv: 0, constant: 3}
+        d: {y: 0, y_inv: 0, constant: 0.2}
+        f: {y: 0, y_inv: 0, constant: 2}
+        g: {y: 0, y_inv: 0, constant: 1}

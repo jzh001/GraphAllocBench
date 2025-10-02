@@ -1,0 +1,89 @@
+{
+  "os": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "python": "CPython 3.10.18",
+  "startedAt": "2025-08-29T19:58:34.004963Z",
+  "program": "/home/zjiang/test/MORL/graphallocbench/examples/training_example.ipynb",
+  "codePath": "graphallocbench/examples/training_example.ipynb",
+  "codePathLocal": "training_example.ipynb",
+  "git": {
+    "remote": "https://github.com/jzh001/MORL",
+    "commit": "41e56426e9e736ed89171d19a0ae090cebc3b370"
+  },
+  "email": "jiangzhsg@gmail.com",
+  "root": "/home/zjiang/test/MORL/graphallocbench/examples",
+  "host": "steai",
+  "executable": "/home/zjiang/anaconda3/envs/test_venv/bin/python",
+  "cpu_count": 40,
+  "cpu_count_logical": 80,
+  "gpu": "Quadro RTX 8000",
+  "gpu_count": 8,
+  "disk": {
+    "/": {
+      "total": "1965717528576",
+      "used": "50829709312"
+    }
+  },
+  "memory": {
+    "total": "810168999936"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-2e0da4a8-2898-0324-436a-f45e4c647c4a"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-70b875cb-c0b1-742f-bfca-c625823a9633"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-44f9a301-8cb7-e7d0-d2f4-cf9827dca0b3"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-98a52b58-303b-8a68-d805-22167fdf0b79"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-df3b8f59-0395-805a-b532-23286088ab36"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-49075775-8c44-efb7-05e6-6a05bcefd57b"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-bc98a02f-7583-b90a-270e-a468f55b61d4"
+    },
+    {
+      "name": "Quadro RTX 8000",
+      "memoryTotal": "51539607552",
+      "cudaCores": 4608,
+      "architecture": "Turing",
+      "uuid": "GPU-db806b4a-f046-7fba-b0ab-f3c2f5ddf533"
+    }
+  ],
+  "cudaVersion": "12.2",
+  "writerId": "7jimk9wp5g0zn1la21oatmgd0hu4i5sj"
+}

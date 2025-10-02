@@ -1,0 +1,242 @@
+resource_count: 2
+demand_count: 2
+demands: [10, 10]
+avail_resources: [10, 10]
+max_steps: 50
+weights:
+  type: uniform # fixed, uniform
+dependencies: [[0, 0], [0, 1], [1, 0], [1, 1]] # [[demand, resource], ...]
+objectives: # these only include possible templates, does not reflect actual structure. Use the generate() function. This template WILL NOT RUN on its own.
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: 10}
+    f: {y: 0, y_inv: 0, constant: 1}
+    g: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: min
+    a: {y: 0, y_inv: 0, constant: 0.6}
+    k: {y: 0, y_inv: 0, constant: 18}
+  - outer_op: max
+    rho: {y: 0, y_inv: 0, constant: 5}
+    phi: {y: 0, y_inv: 0, constant: 0.9}
+    mu: {y: 0, y_inv: 0, constant: 7}
+    k: {y: 0, y_inv: 0, constant: 0.1}
+  - outer_op: max
+    a: {y: 0, y_inv: 0, constant: -1.5}
+    b: {y: 0, y_inv: 0, constant: 0.8}
+    c: {y: 0, y_inv: 0, constant: 12}
+    k: {y: 0, y_inv: 0, constant: 0}
+  - outer_op: none
+    rho: {y: 0, y_inv: 0, constant: 5}
+    phi: {y: 0, y_inv: 0, constant: 0.1}
+    mu: {y: 0, y_inv: 0, constant: 3}
+    d: {y: 0, y_inv: 0, constant: 0.2}
+    f: {y: 0, y_inv: 0, constant: 2}
+    g: {y: 0, y_inv: 0, constant: 1}
+    c: {y: 0, y_inv: 0, constant: 3}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 3}
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: -1}
+    f: {y: 0, y_inv: 0, constant: 1.5}
+    g: {y: 0, y_inv: 0, constant: 2}
+    rho: {y: 0, y_inv: 0, constant: 2.5}
+    phi: {y: 0, y_inv: 0, constant: 1.2}
+    mu: {y: 0, y_inv: 0, constant: 7}
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: -1.5}
+    f: {y: 0, y_inv: 0, constant: 5.5}
+    g: {y: 0, y_inv: 0, constant: 1}
+    rho: {y: 0, y_inv: 0, constant: 9}
+    phi: {y: 0, y_inv: 0, constant: 0.5}
+    mu: {y: 0, y_inv: 0, constant: 2}
+  - outer_op: none
+    c: {y: 0, y_inv: 0, constant: 5}
+    alpha: {y: 0, y_inv: 0, constant: 0.5}
+    beta: {y: 0, y_inv: 0, constant: 1.2}
+    gamma: {y: 0, y_inv: 0, constant: 0.9}
+    zeta: {y: 0, y_inv: 0, constant: 0.6}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: 0.5}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 5}
+    i: {y: 0, y_inv: 0, constant: -1}
+    j: {y: 0, y_inv: 0, constant: 2}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 5}
+    i: {y: 0, y_inv: 0, constant: -1}
+    j: {y: 0, y_inv: 0, constant: 6}
+  - outer_op: none
+    c: {y: 0, y_inv: 0, constant: 5}
+    h: {y: 0, y_inv: 0, constant: -5}
+    i: {y: 0, y_inv: 0, constant: -0.2}
+    j: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 3}
+    i: {y: 0, y_inv: 0, constant: -5}
+    j: {y: 0, y_inv: 0, constant: 2}
+  - outer_op: none
+    c: {y: 0, y_inv: 0, constant: 5}
+    h: {y: 0, y_inv: 0, constant: -5}
+    i: {y: 0, y_inv: 0, constant: -1}
+    j: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 3}
+    i: {y: 0, y_inv: 0, constant: 1}
+    j: {y: 0, y_inv: 0, constant: 2}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: -0.5}
+    rho: {y: 0, y_inv: 0, constant: 5}
+    phi: {y: 0, y_inv: 0, constant: 0.9}
+    mu: {y: 0, y_inv: 0, constant: 7}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: -0.5}
+    b: {y: 0, y_inv: 0, constant: 6}
+    c: {y: 0, y_inv: 0, constant: -3}
+    rho: {y: 0, y_inv: 0, constant: -12}
+    phi: {y: 0, y_inv: 0, constant: 0.5}
+    mu: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: -0.03}
+    b: {y: 0, y_inv: 0, constant: 0.5}
+    c: {y: 0, y_inv: 0, constant: 5}
+    rho: {y: 0, y_inv: 0, constant: 3}
+    phi: {y: 0, y_inv: 0, constant: 0.3}
+    mu: {y: 0, y_inv: 0, constant: 10}
+  - outer_op: max
+    c: {y: 0, y_inv: 0, constant: 5}
+    e: {y: 0, y_inv: 0, constant: -1}
+    f: {y: 0, y_inv: 0, constant: 1.5}
+    g: {y: 0, y_inv: 0, constant: 2}
+    k: {y: 0, y_inv: 0, constant: 3}
+  - outer_op: none
+    c: {y: 0, y_inv: 0, constant: 6}
+    b: {y: 0, y_inv: 0, constant: 0.7}
+    rho: {y: 0, y_inv: 0, constant: -9}
+    phi: {y: 0, y_inv: 0, constant: 0.1}
+    mu: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: -0.5}
+    rho: {y: 0, y_inv: 0, constant: -3}
+    phi: {y: 0, y_inv: 0, constant: 0.5}
+    mu: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: -0.02}
+    b: {y: 0, y_inv: 0, constant: -0.3}
+    c: {y: 0, y_inv: 0, constant: 3}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 3}
+  - outer_op: none
+    alpha: {y: 0, y_inv: 0, constant: -0.3}
+    beta: {y: 0, y_inv: 0, constant: 1.5}
+    gamma: {y: 0, y_inv: 0, constant: 0.9}
+    zeta: {y: 0, y_inv: 0, constant: 0.3}
+  - outer_op: min
+    a: {y: 0, y_inv: 0, constant: 1}
+    b: {y: 0, y_inv: 0, constant: -5}
+    c: {y: 0, y_inv: 0, constant: 2}
+    e: {y: 0, y_inv: 0, constant: -5}
+    f: {y: 0, y_inv: 0, constant: 1.5}
+    g: {y: 0, y_inv: 0, constant: 2}
+    k: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.1}
+    beta: {y: 0, y_inv: 0, constant: 1}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.2}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: 0.5}
+    beta: {y: 0, y_inv: 0, constant: -3}
+    gamma: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.1}
+    alpha: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 11}
+    zeta: {y: 0, y_inv: 0, constant: 3}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 3}
+    i: {y: 0, y_inv: 0, constant: -2}
+    j: {y: 0, y_inv: 0, constant: 3}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.2}
+    alpha: {y: 0, y_inv: 0, constant: 3.1}
+    gamma: {y: 0, y_inv: 0, constant: 3}
+    zeta: {y: 0, y_inv: 0, constant: 0.6}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 12}
+    i: {y: 0, y_inv: 0, constant: 1}
+    j: {y: 0, y_inv: 0, constant: 7}
+    beta: {y: 0, y_inv: 0, constant: 0.8}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.2}
+  - outer_op: none
+    rho: {y: 0, y_inv: 0, constant: 6}
+    phi: {y: 0, y_inv: 0, constant: 0.1}
+    mu: {y: 0, y_inv: 0, constant: 9}
+    h: {y: 0, y_inv: 0, constant: 8}
+    i: {y: 0, y_inv: 0, constant: 1}
+    j: {y: 0, y_inv: 0, constant: 9}
+    alpha: {y: 0, y_inv: 0, constant: 0.3}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.2}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.2}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 9}
+  - outer_op: none
+    beta: {y: 0, y_inv: 0, constant: 1}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.9}
+    h: {y: 0, y_inv: 0, constant: 10}
+    i: {y: 0, y_inv: 0, constant: 0.5}
+    j: {y: 0, y_inv: 0, constant: 9}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.1}
+    beta: {y: 0, y_inv: 0, constant: 0.5}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.2}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 12}
+    i: {y: 0, y_inv: 0, constant: 1}
+    j: {y: 0, y_inv: 0, constant: 7}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 10}
+    zeta: {y: 0, y_inv: 0, constant: 0.5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.2}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 9}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.1}
+    beta: {y: 0, y_inv: 0, constant: 0.5}
+    gamma: {y: 0, y_inv: 0, constant: 1.2}
+    zeta: {y: 0, y_inv: 0, constant: 0.2}
+  - outer_op: none
+    h: {y: 0, y_inv: 0, constant: 12}
+    i: {y: 0, y_inv: 0, constant: 1}
+    j: {y: 0, y_inv: 0, constant: 7}
+    beta: {y: 0, y_inv: 0, constant: 3}
+    gamma: {y: 0, y_inv: 0, constant: 10}
+    zeta: {y: 0, y_inv: 0, constant: 0.5}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: -0.5}
+    rho: {y: 0, y_inv: 0, constant: 5}
+    phi: {y: 0, y_inv: 0, constant: 0.9}
+    mu: {y: 0, y_inv: 0, constant: 7}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: -0.5}
+    b: {y: 0, y_inv: 0, constant: 6}
+    c: {y: 0, y_inv: 0, constant: -3}
+    rho: {y: 0, y_inv: 0, constant: -12}
+    phi: {y: 0, y_inv: 0, constant: 0.5}
+    mu: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: -0.03}
+    b: {y: 0, y_inv: 0, constant: 0.5}
+    c: {y: 0, y_inv: 0, constant: 5}
+    rho: {y: 0, y_inv: 0, constant: 3}
+    phi: {y: 0, y_inv: 0, constant: 0.3}
+    mu: {y: 0, y_inv: 0, constant: 10}
+  - outer_op: none
+    alpha: {y: 0, y_inv: 0, constant: 0.5}
+    beta: {y: 0, y_inv: 0, constant: 1.2}
+    gamma: {y: 0, y_inv: 0, constant: 0.9}
+    zeta: {y: 0, y_inv: 0, constant: 0.6}

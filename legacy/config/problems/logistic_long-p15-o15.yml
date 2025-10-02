@@ -1,0 +1,521 @@
+resource_count: 2
+demand_count: 15
+demands:
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+- 10
+avail_resources:
+- 20
+- 20
+max_steps: 50
+weights:
+  type: uniform
+dependencies:
+- - 0
+  - 0
+- - 0
+  - 1
+- - 1
+  - 0
+- - 1
+  - 1
+- - 2
+  - 0
+- - 2
+  - 1
+- - 3
+  - 0
+- - 3
+  - 1
+- - 4
+  - 0
+- - 4
+  - 1
+- - 5
+  - 0
+- - 5
+  - 1
+- - 6
+  - 0
+- - 6
+  - 1
+- - 7
+  - 0
+- - 7
+  - 1
+- - 8
+  - 0
+- - 8
+  - 1
+- - 9
+  - 0
+- - 9
+  - 1
+- - 10
+  - 0
+- - 10
+  - 1
+- - 11
+  - 0
+- - 11
+  - 1
+- - 12
+  - 0
+- - 12
+  - 1
+- - 13
+  - 0
+- - 13
+  - 1
+- - 14
+  - 0
+- - 14
+  - 1
+objectives:
+- type: eval_production
+  params:
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+- type: eval_production
+  params:
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 1
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 10

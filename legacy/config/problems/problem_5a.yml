@@ -1,0 +1,236 @@
+resource_count: 5
+demand_count: 5
+demands:
+- 6
+- 1
+- 4
+- 4
+- 8
+avail_resources:
+- 8
+- 10
+- 12
+- 9
+- 11
+max_steps: 50
+weights:
+  type: uniform
+dependencies:
+- - 0
+  - 1
+- - 0
+  - 2
+- - 0
+  - 4
+- - 1
+  - 0
+- - 2
+  - 4
+- - 3
+  - 0
+- - 3
+  - 4
+- - 4
+  - 4
+- - 2
+  - 3
+objectives:
+- type: eval_production
+  params:
+  - &id002
+    outer_op: min
+    a:
+      y: 0
+      y_inv: 0
+      constant: 1
+    b:
+      y: 0
+      y_inv: 0
+      constant: -5
+    c:
+      y: 0
+      y_inv: 0
+      constant: 2
+    e:
+      y: 0
+      y_inv: 0
+      constant: -5
+    f:
+      y: 0
+      y_inv: 0
+      constant: 1.5
+    g:
+      y: 0
+      y_inv: 0
+      constant: 2
+    k:
+      y: 0
+      y_inv: 0
+      constant: 5
+  - outer_op: none
+  - outer_op: none
+  - outer_op: none
+    e:
+      y: 0
+      y_inv: 0
+      constant: -1.5
+    f:
+      y: 0
+      y_inv: 0
+      constant: 5.5
+    g:
+      y: 0
+      y_inv: 0
+      constant: 1
+    rho:
+      y: 0
+      y_inv: 0
+      constant: 9
+    phi:
+      y: 0
+      y_inv: 0
+      constant: 0.5
+    mu:
+      y: 0
+      y_inv: 0
+      constant: 2
+  - &id001
+    outer_op: none
+    a:
+      y: 0
+      y_inv: 0
+      constant: 0.1
+    beta:
+      y: 0
+      y_inv: 0
+      constant: 1
+    gamma:
+      y: 0
+      y_inv: 0
+      constant: 1.2
+    zeta:
+      y: 0
+      y_inv: 0
+      constant: 0.2
+- type: eval_production
+  params:
+  - *id001
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 3
+    i:
+      y: 0
+      y_inv: 0
+      constant: -5
+    j:
+      y: 0
+      y_inv: 0
+      constant: 2
+  - outer_op: min
+    a:
+      y: 0
+      y_inv: 0
+      constant: 0.6
+    k:
+      y: 0
+      y_inv: 0
+      constant: 18
+  - outer_op: none
+    b:
+      y: 0
+      y_inv: 0
+      constant: -0.5
+    rho:
+      y: 0
+      y_inv: 0
+      constant: 5
+    phi:
+      y: 0
+      y_inv: 0
+      constant: 0.9
+    mu:
+      y: 0
+      y_inv: 0
+      constant: 7
+  - outer_op: none
+    a:
+      y: 0
+      y_inv: 0
+      constant: -0.5
+    b:
+      y: 0
+      y_inv: 0
+      constant: 6
+    c:
+      y: 0
+      y_inv: 0
+      constant: -3
+    rho:
+      y: 0
+      y_inv: 0
+      constant: -12
+    phi:
+      y: 0
+      y_inv: 0
+      constant: 0.5
+    mu:
+      y: 0
+      y_inv: 0
+      constant: 5
+- type: eval_production
+  params:
+  - *id002
+  - *id001
+  - outer_op: none
+    a:
+      y: 0
+      y_inv: 0
+      constant: -0.03
+    b:
+      y: 0
+      y_inv: 0
+      constant: 0.5
+    c:
+      y: 0
+      y_inv: 0
+      constant: 5
+    rho:
+      y: 0
+      y_inv: 0
+      constant: 3
+    phi:
+      y: 0
+      y_inv: 0
+      constant: 0.3
+    mu:
+      y: 0
+      y_inv: 0
+      constant: 10
+  - outer_op: none
+    h:
+      y: 0
+      y_inv: 0
+      constant: 12
+    i:
+      y: 0
+      y_inv: 0
+      constant: 1
+    j:
+      y: 0
+      y_inv: 0
+      constant: 7
+    beta:
+      y: 0
+      y_inv: 0
+      constant: 3
+    gamma:
+      y: 0
+      y_inv: 0
+      constant: 10
+    zeta:
+      y: 0
+      y_inv: 0
+      constant: 0.5
+  - outer_op: none

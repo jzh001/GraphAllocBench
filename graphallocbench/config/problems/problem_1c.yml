@@ -1,0 +1,28 @@
+resource_count: 2
+demand_count: 2
+demands: [10, 10]
+avail_resources: [10, 10]
+weights:
+  type: uniform # fixed, uniform
+  alpha: 1
+dependencies: [[0, 0], [0, 1], [1, 0], [1, 1]] # [[demand, resource], ...]
+objectives:
+  - type: eval_production
+    params:
+      - outer_op: none
+        b: {y: 0, y_inv: 0, constant: -1}
+      - outer_op: none
+        h: {y: 0, y_inv: 0, constant: 20}
+        i: {y: 0, y_inv: 0, constant: -1}
+        j: {y: 0, y_inv: 0, constant: 3}
+  - type: eval_production
+    params:
+      - outer_op: none
+        h: {y: 0, y_inv: 0, constant: 1}
+        i: {y: 0, y_inv: 0, constant: -1}
+        j: {y: 0, y_inv: 0, constant: 6}
+      - outer_op: none
+        c: {y: 0, y_inv: 0, constant: 5}
+        h: {y: 0, y_inv: 0, constant: -15}
+        i: {y: 0, y_inv: 0, constant: -0.7}
+        j: {y: 0, y_inv: 0, constant: 5}

@@ -1,0 +1,51 @@
+resource_count: 2
+demand_count: 2
+demands: [10, 10]
+avail_resources: [10, 10]
+max_steps: 50
+weights:
+  type: uniform # fixed, uniform
+dependencies: [[0, 0], [0, 1], [1, 0], [1, 1]] # [[demand, resource], ...]
+objectives: # these only include possible templates, does not reflect actual structure. Use the generate() function. This template WILL NOT RUN on its own.
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: 10}
+    f: {y: 0, y_inv: 0, constant: 1}
+    g: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: 5}
+    f: {y: 0, y_inv: 0, constant: 1}
+    g: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    e: {y: 0, y_inv: 0, constant: 1}
+    f: {y: 0, y_inv: 0, constant: 1}
+    g: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 0.1}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 1}
+    c: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    a: {y: 0, y_inv: 0, constant: 10}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: 10}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    b: {y: 0, y_inv: 0, constant: 0.1}
+    c: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    u: {y: 0, y_inv: 0, constant: 1}
+    v: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    u: {y: 0, y_inv: 0, constant: 5}
+    v: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    u: {y: 0, y_inv: 0, constant: 5}
+  - outer_op: none
+    d: {y: 0, y_inv: 0, constant: 1}
+    f: {y: 0, y_inv: 0, constant: 1}
+    g: {y: 0, y_inv: 0, constant: 1}
+  - outer_op: none
+    d: {y: 0, y_inv: 0, constant: 1}
+    f: {y: 0, y_inv: 0, constant: 5}
+    g: {y: 0, y_inv: 0, constant: 2}

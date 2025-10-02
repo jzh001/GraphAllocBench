@@ -1,0 +1,12 @@
+architecture_idx: 3
+clip_range: 0.2
+entropy: 0.02
+env_name: problem_6c
+lr: 1.0e-04
+n_epochs: 20
+n_steps: 2048
+scalarization_method: smooth_tchebycheff
+seed: 42
+smoothness: 0.05
+target_kl: null
+total_timesteps: 3000000

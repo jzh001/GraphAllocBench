@@ -1,0 +1,38 @@
+resource_count: 2
+demand_count: 2
+demands: [10, 10]
+avail_resources: [15, 15]
+weights:
+  type: uniform # fixed, uniform
+  alpha: 1
+dependencies: [[0, 0], [0, 1], [1, 0], [1, 1]] # [[demand, resource], ...]
+objectives:
+  - type: eval_production
+    params:
+      - outer_op: none
+        b: {y: 0, y_inv: 0, constant: 0.5}
+        c: {y: 0, y_inv: 0, constant: 3}
+        beta: {y: 0, y_inv: 0, constant: 3}
+        gamma: {y: 0, y_inv: 0, constant: 3}
+      - outer_op: none
+        e: {y: 0, y_inv: 0, constant: -1}
+        f: {y: 0, y_inv: 0, constant: 1.5}
+        g: {y: 0, y_inv: 0, constant: 2}
+        rho: {y: 0, y_inv: 0, constant: 2.5}
+        phi: {y: 0, y_inv: 0, constant: 1.2}
+        mu: {y: 0, y_inv: 0, constant: 7}
+  - type: eval_production
+    params:
+      - outer_op: none
+        e: {y: 0, y_inv: 0, constant: -1.5}
+        f: {y: 0, y_inv: 0, constant: 5.5}
+        g: {y: 0, y_inv: 0, constant: 1}
+        rho: {y: 0, y_inv: 0, constant: 9}
+        phi: {y: 0, y_inv: 0, constant: 0.5}
+        mu: {y: 0, y_inv: 0, constant: 2}
+      - outer_op: none
+        c: {y: 0, y_inv: 0, constant: 5}
+        alpha: {y: 0, y_inv: 0, constant: 0.5}
+        beta: {y: 0, y_inv: 0, constant: 1.2}
+        gamma: {y: 0, y_inv: 0, constant: 0.9}
+        zeta: {y: 0, y_inv: 0, constant: 0.6}

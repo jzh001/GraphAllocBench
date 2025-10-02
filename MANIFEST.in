@@ -1,0 +1,3 @@
+prune graphallocbench/examples/models
+recursive-include graphallocbench/config *.yml
+recursive-include sweep_config *.yml

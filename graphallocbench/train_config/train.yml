@@ -1,0 +1,14 @@
+# Train Config Template
+
+architecture_idx: 0
+clip_range: 0.2
+entropy: 0.01
+env_name: convex_long-p5-o5
+lr: 1.0e-04
+n_epochs: 20
+n_steps: 2048
+scalarization_method: smooth_tchebycheff
+seed: 42
+smoothness: 0.01
+target_kl: null
+total_timesteps: 2000000

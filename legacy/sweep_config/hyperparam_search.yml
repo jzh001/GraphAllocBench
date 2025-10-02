@@ -1,0 +1,69 @@
+program: sweep.py
+method: bayes
+metric: 
+  goal: maximize
+  name: hypervolume
+parameters:
+  target_kl:
+    min: 0.005
+    max: 0.03
+  lr:
+    min: 0.00001
+    max: 0.0001
+  entropy:
+    min: 0.0
+    max: 0.2
+  n_steps:
+    value: 2048
+  n_epochs:
+    value: 20
+  clip_range:
+    min: 0.05
+    max: 0.30
+  smoothness:
+    min: 0.0
+    max: 0.1
+  scalarization_method:
+    value: smooth_tchebycheff
+    # values:
+    # - linear
+    # - tchebycheff
+    # - augmented_tchebycheff
+    # - smooth_tchebycheff
+    # - pbi
+  total_timesteps:
+    value: 200000
+  env_name:
+    value: problem_0
+    # values:
+    # - problem_0
+    # - problem_1a
+    # - problem_1b
+    # - problem_1c
+    # - problem_2a
+    # - problem_2b
+    # - problem_2c
+    # - problem_3a
+    # - problem_3b
+    # - problem_4a
+    # - problem_4b
+    # - problem_5a
+    # - problem_5b
+    # - problem_5c
+    # - problem_5d
+    # - problem_5e
+  architecture_idx:
+    value: 0
+  seed: 
+    value: 42
+    # values:
+    # - 1
+    # - 2
+    # - 3
+    # - 4
+    # - 5
+    # - 6
+    # - 7
+    # - 8
+    # - 9
+    # - 10
