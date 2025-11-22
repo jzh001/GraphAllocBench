@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
 # Ensure the repository root (one level up from this file) is importable
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -30,6 +31,7 @@ from pdmorl.common import (  # noqa: E402
 )
 from graphallocbench.evaluation import utils as eval_utils  # noqa: E402
 from graphallocbench.evaluation.inference import run_experiments  # noqa: E402
+from graphallocbench.evaluation.analytical import get_analytical_objectives  # noqa: E402
 from graphallocbench.city_env.env_model import CityPlannerEnv  # noqa: E402
 
 # Locate the cloned PD-MORL repository (cloned under pdmorl/external by default)
@@ -136,6 +138,11 @@ def evaluate_agent(
     )
     objectives = np.asarray(final_objectives, dtype=np.float32)
     hv = float(eval_utils.calculate_hypervolume(objectives))
+    ideal_objectives = (
+        get_analytical_objectives(env=ordering_env) if ordering_env.demand_count < 6 else None
+    )
+    ideal_hv = float(eval_utils.calculate_hypervolume(ideal_objectives)) if ideal_objectives is not None else 0.0
+    normalized_hv = hv / ideal_hv if ideal_hv > 0 else 0.0
     pnd = float(eval_utils.calculate_non_dominated(objectives))
     ordering = float(
         eval_utils.calculate_ordering_score(
@@ -148,56 +155,76 @@ def evaluate_agent(
     )
     return {
         "hypervolume": hv,
+        "normalized_hypervolume": normalized_hv,
         "percent_non_dominated": pnd,
         "ordering_score": ordering,
         "objectives": objectives,
     }
 
 
-def save_checkpoint(model, save_dir: Path, step: int, args: argparse.Namespace) -> Path:
-    save_dir.mkdir(parents=True, exist_ok=True)
-    checkpoint_path = save_dir / f"ddqn_step_{step}.pt"
+def save_checkpoint(
+    model,
+    save_dir: Path,
+    step: int,
+    problem_name: str,
+    seed: int,
+    args: argparse.Namespace,
+) -> Path:
+    checkpoint_dir = save_dir / problem_name / f"seed-{seed}"
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = checkpoint_dir / f"ddqn_step_{step}.pt"
     torch.save({"state_dict": model.state_dict(), "train_args": vars(args)}, checkpoint_path)
     return checkpoint_path
 
 
-def train(args: argparse.Namespace) -> None:
-    _extend_sys_path(Path(args.pdmorl_root))
-    MO_DDQN, ptan_actions, ptan_agent = _import_pdmorl_modules()
+def _normalize_preferences(prefs):
+    if isinstance(prefs, torch.Tensor):
+        data = prefs.detach().cpu().numpy()
+    else:
+        data = np.asarray(prefs, dtype=np.float32)
+    norms = np.linalg.norm(data, ord=1, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    return data / norms
 
-    rng = np.random.default_rng(args.seed)
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+
+def train_single_seed(
+    args: argparse.Namespace,
+    seed: int,
+    MO_DDQN,
+    ptan_actions,
+    ptan_agent,
+) -> None:
+    rng = np.random.default_rng(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
     env = GraphAllocDiscreteEnv(args.config)
     algo_args, device = make_algo_namespace(env, args)
     net = MO_DDQN(algo_args)
     action_selector = ptan_actions.EpsilonGreedyActionSelector(epsilon=args.epsilon_start)
     agent = ptan_agent.MO_DDQN_HER(net, action_selector, device, algo_args)
-
-    def _normalize_preferences(prefs):
-        if isinstance(prefs, torch.Tensor):
-            data = prefs.detach().cpu().numpy()
-        else:
-            data = np.asarray(prefs, dtype=np.float32)
-        norms = np.linalg.norm(data, ord=1, axis=1, keepdims=True)
-        norms[norms == 0] = 1.0
-        return data / norms
-
     agent.interp = _normalize_preferences
 
     pref_grid = prepare_preferences(args, env.n_objectives)
-
     buffer = ReplayBuffer(args.buffer_size)
-    writer = SummaryWriter(args.log_dir)
+    problem_name = Path(args.config).stem
+    writer_dir = Path(args.log_dir) / problem_name / f"seed-{seed}"
+    writer_dir.mkdir(parents=True, exist_ok=True)
+    writer = SummaryWriter(str(writer_dir))
     env.set_episode_preference(sample_preference(rng, env.n_objectives, args.dirichlet_alpha))
     state = env.reset()
     episode_reward = np.zeros(env.n_objectives, dtype=np.float32)
     episode_len = 0
     start_time = time.time()
 
-    for step in range(1, args.total_steps + 1):
+    for step in tqdm(
+        range(1, args.total_steps + 1),
+        desc=f"seed {seed}",
+        unit="step",
+        leave=False,
+        total=args.total_steps,
+    ):
         if state is None:
             state = env.reset()
         pref = env.current_preference
@@ -229,27 +256,53 @@ def train(args: argparse.Namespace) -> None:
             episode_len = 0
 
         if step % args.eval_interval == 0:
-            metrics = evaluate_agent(agent, args.config, pref_grid, device, args.seed)
+            metrics = evaluate_agent(agent, args.config, pref_grid, device, seed)
             writer.add_scalar("eval/hypervolume", metrics["hypervolume"], step)
+            writer.add_scalar("eval/normalized_hypervolume", metrics["normalized_hypervolume"], step)
             writer.add_scalar("eval/percent_non_dominated", metrics["percent_non_dominated"], step)
             writer.add_scalar("eval/ordering_score", metrics["ordering_score"], step)
-            save_path = save_checkpoint(agent.net, Path(args.save_dir), step, args)
+            save_path = save_checkpoint(
+                agent.net,
+                Path(args.save_dir),
+                step,
+                problem_name,
+                seed,
+                args,
+            )
             serializable_metrics = {
                 k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in metrics.items()
             }
-            with open(Path(args.save_dir) / f"metrics_step_{step}.json", "w", encoding="utf-8") as fh:
+            metrics_path = save_path.parent / f"metrics_step_{step}.json"
+            with open(metrics_path, "w", encoding="utf-8") as fh:
                 json.dump({"step": step, **serializable_metrics, "checkpoint": str(save_path)}, fh, indent=2)
-            print(
-                f"[step={step}] HV={metrics['hypervolume']:.4f} | "
+            tqdm.write(
+                f"[seed={seed} step={step}] HV={metrics['hypervolume']:.4f} | "
+                f"NormHV={metrics['normalized_hypervolume']:.4f} | "
                 f"PND={metrics['percent_non_dominated']:.4f} | "
                 f"Order={metrics['ordering_score']:.4f}"
             )
 
     elapsed_min = (time.time() - start_time) / 60
-    print(f"Training completed in {elapsed_min:.2f} minutes.")
-    final_path = save_checkpoint(agent.net, Path(args.save_dir), args.total_steps, args)
-    print(f"Final checkpoint saved to {final_path}")
+    tqdm.write(f"[seed={seed}] Training completed in {elapsed_min:.2f} minutes.")
+    final_path = save_checkpoint(
+        agent.net,
+        Path(args.save_dir),
+        args.total_steps,
+        problem_name,
+        seed,
+        args,
+    )
+    tqdm.write(f"[seed={seed}] Final checkpoint saved to {final_path}")
     writer.close()
+
+
+def train(args: argparse.Namespace) -> None:
+    _extend_sys_path(Path(args.pdmorl_root))
+    MO_DDQN, ptan_actions, ptan_agent = _import_pdmorl_modules()
+    seed_list = args.seeds if args.seeds else [args.seed]
+    for seed in seed_list:
+        print(f"Starting training for seed {seed} on {Path(args.config).stem}")
+        train_single_seed(args, seed, MO_DDQN, ptan_actions, ptan_agent)
 
 
 def parse_args() -> argparse.Namespace:
@@ -274,7 +327,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layer-n", type=int, default=2, help="Hidden layer count for MO-DDQN.")
     parser.add_argument("--hidden-size", type=int, default=512, help="Hidden width for MO-DDQN layers.")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--seed", type=int, default=42, help="Fallback seed when --seeds is empty.")
+    parser.add_argument(
+        "--seeds",
+        type=int,
+        nargs="*",
+        default=[0, 1, 2, 3, 4],
+        help="List of seeds to train (overrides --seed).",
+    )
     parser.add_argument("--log-dir", type=str, default=str(SCRIPT_DIR / "runs"))
     parser.add_argument("--save-dir", type=str, default=str(SCRIPT_DIR / "checkpoints"))
     return parser.parse_args()

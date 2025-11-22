@@ -26,6 +26,7 @@ from pdmorl.common import (  # noqa: E402
 )
 from graphallocbench.evaluation import utils as eval_utils  # noqa: E402
 from graphallocbench.evaluation.inference import run_experiments  # noqa: E402
+from graphallocbench.evaluation.analytical import get_analytical_objectives  # noqa: E402
 from graphallocbench.city_env.env_model import CityPlannerEnv  # noqa: E402
 
 DEFAULT_PD_MORL_ROOT = SCRIPT_DIR / "external" / "PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm"
@@ -127,6 +128,11 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
     )
     objectives = np.asarray(final_objectives, dtype=np.float32)
     hv = float(eval_utils.calculate_hypervolume(objectives))
+    ideal_objectives = (
+        get_analytical_objectives(env=ordering_env) if ordering_env.demand_count < 6 else None
+    )
+    ideal_hv = float(eval_utils.calculate_hypervolume(ideal_objectives)) if ideal_objectives is not None else 0.0
+    normalized_hv = hv / ideal_hv if ideal_hv > 0 else 0.0
     pnd = float(eval_utils.calculate_non_dominated(objectives))
     ordering = float(
         eval_utils.calculate_ordering_score(
@@ -139,6 +145,7 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
     )
     return {
         "hypervolume": hv,
+        "normalized_hypervolume": normalized_hv,
         "percent_non_dominated": pnd,
         "ordering_score": ordering,
         "objectives": objectives,
@@ -161,16 +168,18 @@ def _load_reference_hv(config_name: str) -> float | None:
 
 
 def _write_metrics_csv(args: argparse.Namespace, config_name: str, seed: int, metrics: dict) -> None:
-    csv_path = Path(args.csv_output) if args.csv_output else DATA_DIR / f"pdmorl_stats_{config_name}.csv"
+    csv_path = Path(args.csv_output) if args.csv_output else DATA_DIR / "pdmorl_stats.csv"
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     reference_hv = _load_reference_hv(config_name)
     hv = float(metrics["hypervolume"])
     normalized_hv = hv / reference_hv if reference_hv and reference_hv > 0 else hv
     fieldnames = [
+        "problem",
         "config",
         "checkpoint",
         "hypervolume",
         "normalized_hv",
+        "normalized_hv_ideal",
         "percent_non_dominated",
         "ordering_score",
         "pref_grid_step",
@@ -182,10 +191,12 @@ def _write_metrics_csv(args: argparse.Namespace, config_name: str, seed: int, me
         "timestamp",
     ]
     row = {
-        "config": config_name,
+        "problem": config_name,
+        "config": args.config,
         "checkpoint": args.checkpoint,
         "hypervolume": hv,
         "normalized_hv": normalized_hv,
+        "normalized_hv_ideal": float(metrics["normalized_hypervolume"]),
         "percent_non_dominated": float(metrics["percent_non_dominated"]),
         "ordering_score": float(metrics["ordering_score"]),
         "pref_grid_step": args.pref_grid_step,
@@ -220,7 +231,8 @@ def parse_args() -> argparse.Namespace:
         default=[0, 1, 2, 3, 4],
         help="List of seeds to evaluate (overrides --seed).",
     )
-    parser.add_argument("--output", type=str, default=str(SCRIPT_DIR / "evaluation.json"))
+    default_output = DATA_DIR / "evaluation"
+    parser.add_argument("--output", type=str, default="", help="Optional custom JSON output path.")
     parser.add_argument("--tau", type=float, default=0.01)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--gamma", type=float, default=0.99)
@@ -246,11 +258,18 @@ if __name__ == "__main__":
         _write_metrics_csv(args, config_name, seed, metrics)
         print(
             f"[seed={seed}] Hypervolume={metrics['hypervolume']:.4f} | "
+            f"NormHV={metrics['normalized_hypervolume']:.4f} | "
             f"PND={metrics['percent_non_dominated']:.4f} | "
             f"Order={metrics['ordering_score']:.4f}"
         )
 
-    out_path = Path(args.output)
+    seed_label = (
+        f"seeds_{'_'.join(map(str, seed_list))}"
+        if args.seeds
+        else f"seed_{seed_list[0]}"
+    )
+    default_json = (DATA_DIR / "evaluation" / f"{config_name}_{seed_label}.json").resolve()
+    out_path = Path(args.output) if args.output else default_json
     out_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "config": args.config,

@@ -185,11 +185,11 @@ def ensure_pymoo_factory() -> None:
 
 @dataclass
 class TrainingConfig:
-    total_steps: int = 100_000
+    total_steps: int = 1_000_000
     batch_size: int = 128
     buffer_size: int = 200_000
     start_steps: int = 2_000
-    eval_interval: int = 2_000
+    eval_interval: int = 100_000
     epsilon_start: float = 0.2
     epsilon_final: float = 0.01
     epsilon_decay_steps: int = 50_000

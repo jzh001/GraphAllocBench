@@ -1,6 +1,0 @@
-config,checkpoint,hypervolume,normalized_hv,percent_non_dominated,ordering_score,pref_grid_step,tau,learning_rate,gamma,batch_size,seed,timestamp
-problem_0,pdmorl/checkpoints/ddqn_step_60000.pt,432.61774990717663,0.9755778452353869,1.0,1.0,0.1,0.01,0.0003,0.99,256,0,2025-11-22T00:53:50.225927
-problem_0,pdmorl/checkpoints/ddqn_step_60000.pt,432.61774990717663,0.9755778452353869,1.0,1.0,0.1,0.01,0.0003,0.99,256,1,2025-11-22T00:53:51.292697
-problem_0,pdmorl/checkpoints/ddqn_step_60000.pt,432.61774990717663,0.9755778452353869,1.0,1.0,0.1,0.01,0.0003,0.99,256,2,2025-11-22T00:53:52.419997
-problem_0,pdmorl/checkpoints/ddqn_step_60000.pt,432.61774990717663,0.9755778452353869,1.0,1.0,0.1,0.01,0.0003,0.99,256,3,2025-11-22T00:53:53.390218
-problem_0,pdmorl/checkpoints/ddqn_step_60000.pt,432.61774990717663,0.9755778452353869,1.0,1.0,0.1,0.01,0.0003,0.99,256,4,2025-11-22T00:53:54.466796

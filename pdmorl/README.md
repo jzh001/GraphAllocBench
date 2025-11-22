@@ -33,10 +33,11 @@ Key behaviours:
 
 - Wraps `CityPlannerEnv` so MO-DDQN-HER receives flat observations and a discrete action space.
 - Samples Dirichlet preference vectors each episode, applies them to the environment, and feeds them into the agent.
-- Writes checkpoints plus per-evaluation metric JSON under `pdmorl/checkpoints/` and TensorBoard logs under `pdmorl/runs/`.
-- Every `--eval-interval` steps, runs the official GraphAllocBench metrics (hypervolume, percent non dominated, ordering score) and prints them to stdout.
+- Writes checkpoints plus per-evaluation metric JSON under `pdmorl/checkpoints/<problem>/seed-<seed>/` and TensorBoard logs under `pdmorl/runs/` so multiple problems/seeds can coexist without overwriting.
+- Every `--eval-interval` steps (default 100k), runs the official GraphAllocBench metrics (hypervolume, normalized hypervolume vs. the analytical ideal when available, percent non dominated, ordering score) and prints them to stdout.
+- Runs seeds 0–4 by default (set `--seeds` or `--seed` to override) so every run produces problem/seed-specific checkpoints and logs.
 
-Override hyperparameters via CLI flags (see `python pdmorl/train_graphalloc_pdmorl.py --help`). Defaults target CUDA (`--device cuda`).
+Override hyperparameters via CLI flags (see `python pdmorl/train_graphalloc_pdmorl.py --help`). The script defaults to 1M training steps, so pass `--total-steps` if you want shorter smoke tests. Defaults target CUDA (`--device cuda`).
 
 ## 3. Evaluation
 
@@ -45,17 +46,18 @@ Evaluate any checkpoint across multiple seeds (defaults to 0–4) and export bot
 ```bash
 python pdmorl/evaluate_graphalloc_pdmorl.py \
   --config graphallocbench/config/problems/problem_0.yml \
-  --checkpoint pdmorl/checkpoints/ddqn_step_60000.pt \
+  --checkpoint pdmorl/checkpoints/problem_0/seed-42/ddqn_step_1000000.pt \
   --device cuda
 ```
 
 Outputs:
 
 - Per-seed metrics printed to stdout.
-- Aggregated JSON (`pdmorl/evaluation.json` by default) containing the full objective arrays for each seed.
-- CSV rows appended to `pdmorl/data/pdmorl_stats_<config>.csv` with hypervolume, normalized HV (vs. reference stats copied into `pdmorl/data/GraphAllocBench-v2`), percent non dominated, ordering score, and eval settings.
+- Aggregated JSON (e.g. `pdmorl/data/evaluation/problem_0_seed_42.json` or `..._seeds_0_1_2_3_4.json`) containing the full objective arrays for each seed.
+- CSV rows appended to `pdmorl/data/pdmorl_stats.csv` for every problem. Each row includes the `problem` label along with hypervolume, normalized HV vs. reference stats copied into `pdmorl/data/GraphAllocBench-v2`, normalized HV vs. the analytical ideal (when demand count < 6), percent non dominated, ordering score, and eval settings, so you can sort/filter inside one sheet.
+  Aggregated JSON files are named `{problem}_{seed_label}.json` under `pdmorl/data/evaluation/`, so rerunning with a different `--seeds` list keeps a separate JSON snapshot.
 
-Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere.
+Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere. All comparisons should use the 1M-step checkpoint (`ddqn_step_1000000.pt`) so hypervolume numbers line up with the training defaults noted above.
 
 ## 4. Tips
 
