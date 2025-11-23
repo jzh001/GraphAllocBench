@@ -23,7 +23,9 @@ def calculate_ordering_score(env: CityPlannerEnv,
                              model_path=None,
                              n_iter = 10,
                              n_intervals = 10,
-                             random_seed=42):
+                             random_seed=42,
+                             alpha = 1.0,
+                             ):
     np.random.seed(random_seed)
     if model is None:
         model = load_model(model_path, env=env)
@@ -31,7 +33,7 @@ def calculate_ordering_score(env: CityPlannerEnv,
     preferences = []
     for i in range(env.n_objectives):
         for j in range(n_iter):
-            preferences_template = np.random.dirichlet(np.ones(env.n_objectives))
+            preferences_template = np.random.dirichlet(np.ones(env.n_objectives) * alpha)
             for p in np.linspace(0, 1, n_intervals):
                 pref = preferences_template.copy()
                 pref[i] = 0

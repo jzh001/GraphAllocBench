@@ -21,10 +21,7 @@ else:
     ALLOWED_GPUS = []
 
 if not ALLOWED_GPUS:
-    if torch.backends.mps.is_available():
-        ALLOWED_GPUS = ["mps"]
-    else:
-        ALLOWED_DEVICES = ["cpu"]
+    ALLOWED_DEVICES = ["cpu"]
 else:
     ALLOWED_DEVICES = [f"cuda:{i}" for i in ALLOWED_GPUS]
 

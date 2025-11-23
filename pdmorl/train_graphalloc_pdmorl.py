@@ -324,8 +324,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--weight-batch", type=int, default=TrainingConfig.weight_batch_size)
     parser.add_argument("--dirichlet-alpha", type=float, default=TrainingConfig.dirichlet_alpha)
     parser.add_argument("--pref-grid-step", type=float, default=TrainingConfig.pref_grid_step)
-    parser.add_argument("--layer-n", type=int, default=2, help="Hidden layer count for MO-DDQN.")
-    parser.add_argument("--hidden-size", type=int, default=512, help="Hidden width for MO-DDQN layers.")
+    parser.add_argument("--layer-n", type=int, default=3, help="Hidden layer count for MO-DDQN.")
+    parser.add_argument("--hidden-size", type=int, default=256, help="Hidden width for MO-DDQN layers.")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--seed", type=int, default=42, help="Fallback seed when --seeds is empty.")
     parser.add_argument(

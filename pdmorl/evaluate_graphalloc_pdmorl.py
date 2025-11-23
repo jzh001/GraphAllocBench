@@ -90,7 +90,7 @@ def prepare_preferences(step: float, n_objectives: int) -> np.ndarray:
     return mesh.astype(np.float32)
 
 
-def build_agent(args: argparse.Namespace, env: GraphAllocDiscreteEnv):
+def build_agent(args: argparse.Namespace, env: GraphAllocDiscreteEnv, checkpoint_path: Path):
     _extend_sys_path(Path(args.pdmorl_root))
     MO_DDQN, ptan_actions, ptan_agent = _import_pdmorl_modules()
     algo_args, device = make_algo_namespace(env, args)
@@ -98,7 +98,7 @@ def build_agent(args: argparse.Namespace, env: GraphAllocDiscreteEnv):
     action_selector = ptan_actions.EpsilonGreedyActionSelector(epsilon=0.0)
     agent = ptan_agent.MO_DDQN_HER(net, action_selector, device, algo_args)
 
-    checkpoint = torch.load(args.checkpoint, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device)
     state_dict = checkpoint.get("state_dict", checkpoint)
     agent.net.load_state_dict(state_dict)
     agent.tgt_net.load_state_dict(state_dict)
@@ -152,34 +152,23 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
     }
 
 
-def _load_reference_hv(config_name: str) -> float | None:
-    for root in REFERENCE_DIRS:
-        ref_path = root / f"stats_{config_name}.csv"
-        if not ref_path.exists():
-            continue
-        try:
-            with open(ref_path, "r", encoding="utf-8") as fh:
-                reader = csv.DictReader(fh)
-                values = [float(row.get("hypervolume", 0)) for row in reader if row.get("hypervolume")]
-            return max(values) if values else None
-        except (OSError, ValueError):
-            continue
-    return None
 
-
-def _write_metrics_csv(args: argparse.Namespace, config_name: str, seed: int, metrics: dict) -> None:
+def _write_metrics_csv(
+    args: argparse.Namespace,
+    config_name: str,
+    seed: int,
+    metrics: dict,
+    checkpoint_path: Path,
+) -> None:
     csv_path = Path(args.csv_output) if args.csv_output else DATA_DIR / "pdmorl_stats.csv"
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    reference_hv = _load_reference_hv(config_name)
     hv = float(metrics["hypervolume"])
-    normalized_hv = hv / reference_hv if reference_hv and reference_hv > 0 else hv
     fieldnames = [
         "problem",
         "config",
         "checkpoint",
         "hypervolume",
         "normalized_hv",
-        "normalized_hv_ideal",
         "percent_non_dominated",
         "ordering_score",
         "pref_grid_step",
@@ -193,10 +182,9 @@ def _write_metrics_csv(args: argparse.Namespace, config_name: str, seed: int, me
     row = {
         "problem": config_name,
         "config": args.config,
-        "checkpoint": args.checkpoint,
+        "checkpoint": str(checkpoint_path),
         "hypervolume": hv,
-        "normalized_hv": normalized_hv,
-        "normalized_hv_ideal": float(metrics["normalized_hypervolume"]),
+        "normalized_hv": float(metrics["normalized_hypervolume"]),
         "percent_non_dominated": float(metrics["percent_non_dominated"]),
         "ordering_score": float(metrics["ordering_score"]),
         "pref_grid_step": args.pref_grid_step,
@@ -215,11 +203,27 @@ def _write_metrics_csv(args: argparse.Namespace, config_name: str, seed: int, me
         writer.writerow(row)
 
 
+def _resolve_checkpoint_path(base_path: str, seed: int) -> Path:
+    if "{seed}" in base_path:
+        candidate = base_path.replace("{seed}", str(seed))
+    else:
+        candidate = base_path
+    path = Path(candidate)
+    if not path.exists():
+        raise FileNotFoundError(f"Checkpoint for seed {seed} not found at {path}")
+    return path
+
+
 def parse_args() -> argparse.Namespace:
     default_config = REPO_ROOT / "graphallocbench" / "config" / "problems" / "problem_0.yml"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=str, default=str(default_config), help="Problem configuration path.")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Path to a saved PD-MORL checkpoint.")
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        required=True,
+        help="Path (or template with {seed}) to a saved PD-MORL checkpoint.",
+    )
     parser.add_argument("--pdmorl-root", type=str, default=str(DEFAULT_PD_MORL_ROOT))
     parser.add_argument("--pref-grid-step", type=float, default=0.1)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
@@ -237,8 +241,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--batch-size", type=int, default=256)
-    parser.add_argument("--layer-n", type=int, default=2)
-    parser.add_argument("--hidden-size", type=int, default=512)
+    parser.add_argument("--layer-n", type=int, default=3)
+    parser.add_argument("--hidden-size", type=int, default=256)
     parser.add_argument("--csv-output", type=str, default="", help="Optional path for the CSV metrics file.")
     return parser.parse_args()
 
@@ -246,16 +250,17 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
     env = GraphAllocDiscreteEnv(args.config)
-    agent, device = build_agent(args, env)
     prefs = prepare_preferences(args.pref_grid_step, env.n_objectives)
     seed_list = args.seeds if args.seeds else [args.seed]
     results = []
     config_name = Path(args.config).stem
     for seed in seed_list:
+        checkpoint_path = _resolve_checkpoint_path(args.checkpoint, seed)
+        agent, device = build_agent(args, env, checkpoint_path)
         metrics = evaluate(agent, args.config, prefs, device, seed)
         serializable = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in metrics.items()}
         results.append({"seed": seed, **serializable})
-        _write_metrics_csv(args, config_name, seed, metrics)
+        _write_metrics_csv(args, config_name, seed, metrics, checkpoint_path)
         print(
             f"[seed={seed}] Hypervolume={metrics['hypervolume']:.4f} | "
             f"NormHV={metrics['normalized_hypervolume']:.4f} | "

@@ -46,18 +46,18 @@ Evaluate any checkpoint across multiple seeds (defaults to 0–4) and export bot
 ```bash
 python pdmorl/evaluate_graphalloc_pdmorl.py \
   --config graphallocbench/config/problems/problem_0.yml \
-  --checkpoint pdmorl/checkpoints/problem_0/seed-42/ddqn_step_1000000.pt \
+  --checkpoint "pdmorl/checkpoints/problem_0/seed-{seed}/ddqn_step_1000000.pt" \
   --device cuda
 ```
 
 Outputs:
 
 - Per-seed metrics printed to stdout.
-- Aggregated JSON (e.g. `pdmorl/data/evaluation/problem_0_seed_42.json` or `..._seeds_0_1_2_3_4.json`) containing the full objective arrays for each seed.
+- Aggregated JSON (e.g. `pdmorl/data/evaluation/problem_0_seed_0.json` or `..._seeds_0_1_2_3_4.json`) containing the full objective arrays for each seed.
 - CSV rows appended to `pdmorl/data/pdmorl_stats.csv` for every problem. Each row includes the `problem` label along with hypervolume, normalized HV vs. reference stats copied into `pdmorl/data/GraphAllocBench-v2`, normalized HV vs. the analytical ideal (when demand count < 6), percent non dominated, ordering score, and eval settings, so you can sort/filter inside one sheet.
   Aggregated JSON files are named `{problem}_{seed_label}.json` under `pdmorl/data/evaluation/`, so rerunning with a different `--seeds` list keeps a separate JSON snapshot.
 
-Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere. All comparisons should use the 1M-step checkpoint (`ddqn_step_1000000.pt`) so hypervolume numbers line up with the training defaults noted above.
+Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere. The `--checkpoint` flag accepts `{seed}` as a placeholder, so the command above automatically evaluates `seed-0` through `seed-4` when run with the default `--seeds 0 1 2 3 4`. If you only want a single seed, pass an explicit checkpoint path without `{seed}` (or override `--seeds`).
 
 ## 4. Tips
 
