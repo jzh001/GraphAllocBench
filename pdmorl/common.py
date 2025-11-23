@@ -194,8 +194,8 @@ class TrainingConfig:
     epsilon_final: float = 0.01
     epsilon_decay_steps: int = 50_000
     gamma: float = 0.99
-    lr: float = 3e-4
-    tau: float = 0.02
+    lr: float = 1e-4
+    tau: float = 0.005
     weight_batch_size: int = 3
-    dirichlet_alpha: float = 0.5
+    dirichlet_alpha: float = 1.0
     pref_grid_step: float = 0.05
