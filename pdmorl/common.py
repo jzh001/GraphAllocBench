@@ -22,8 +22,9 @@ def flatten_city_observation(obs: Dict[str, np.ndarray]) -> np.ndarray:
     """Convert the CityPlanner dict observation into a flat float32 vector."""
     allocation = np.asarray(obs["allocation_matrix"], dtype=np.float32).flatten()
     requirements = np.asarray(obs["requirements_matrix"], dtype=np.float32).flatten()
-    prefs = np.asarray(obs["prefs"], dtype=np.float32).flatten()
-    return np.concatenate([allocation, requirements, prefs]).astype(np.float32)
+    # prefs = np.asarray(obs["prefs"], dtype=np.float32).flatten()
+    # return np.concatenate([allocation, requirements, prefs]).astype(np.float32)
+    return np.concatenate([allocation, requirements]).astype(np.float32)
 
 
 def action_index_to_multidiscrete(index: int, demand_count: int) -> np.ndarray:
@@ -186,15 +187,15 @@ def ensure_pymoo_factory() -> None:
 @dataclass
 class TrainingConfig:
     total_steps: int = 1_000_000
-    batch_size: int = 128
-    buffer_size: int = 200_000
-    start_steps: int = 2_000
+    batch_size: int = 32
+    buffer_size: int = 10_000
+    start_steps: int = 64
     eval_interval: int = 100_000
-    epsilon_start: float = 0.2
-    epsilon_final: float = 0.01
+    epsilon_start: float = 0.8
+    epsilon_final: float = 0.05
     epsilon_decay_steps: int = 50_000
     gamma: float = 0.99
-    lr: float = 1e-4
+    lr: float = 3e-4
     tau: float = 0.005
     weight_batch_size: int = 3
     dirichlet_alpha: float = 1.0

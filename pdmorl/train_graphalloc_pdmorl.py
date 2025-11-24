@@ -13,6 +13,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -57,28 +58,9 @@ def _import_pdmorl_modules():  # pragma: no cover - thin wrapper around imports
     from lib.models.networks import MO_DDQN  # type: ignore
     from lib.common_ptan import actions as ptan_actions  # type: ignore
     from lib.common_ptan import agent as ptan_agent  # type: ignore
+    from lib.common_ptan import experience as ptan_experience  # type: ignore
 
-    return MO_DDQN, ptan_actions, ptan_agent
-
-
-Experience = namedtuple(
-    "Experience", ["state", "action", "reward", "next_state", "terminal", "preference"]
-)
-
-
-class ReplayBuffer:
-    def __init__(self, capacity: int):
-        self.storage = deque(maxlen=capacity)
-
-    def __len__(self) -> int:
-        return len(self.storage)
-
-    def add(self, experience: Experience) -> None:
-        self.storage.append(experience)
-
-    def sample(self, batch_size: int) -> list[Experience]:
-        idxs = np.random.choice(len(self.storage), batch_size, replace=True)
-        return [self.storage[i] for i in idxs]
+    return MO_DDQN, ptan_actions, ptan_agent, ptan_experience
 
 
 def sample_preference(rng: np.random.Generator, n_objectives: int, alpha: float) -> np.ndarray:
@@ -105,6 +87,10 @@ def make_algo_namespace(env: GraphAllocDiscreteEnv, args: argparse.Namespace) ->
         batch_size=args.batch_size,
         layer_N=args.layer_n,
         hidden_size=args.hidden_size,
+        replay_size=args.buffer_size,
+        start_timesteps=args.start_steps,
+        process_count=1,
+        time_steps=args.total_steps,  # Used by ExperienceReplayBuffer_HER_MO
     )
     return algo_args, device
 
@@ -193,6 +179,7 @@ def train_single_seed(
     MO_DDQN,
     ptan_actions,
     ptan_agent,
+    ptan_experience,
 ) -> None:
     rng = np.random.default_rng(seed)
     random.seed(seed)
@@ -207,7 +194,9 @@ def train_single_seed(
     agent.interp = _normalize_preferences
 
     pref_grid = prepare_preferences(args, env.n_objectives)
-    buffer = ReplayBuffer(args.buffer_size)
+    # Use the buffer from the external repo
+    buffer = ptan_experience.ExperienceReplayBuffer_HER_MO(None, algo_args)
+    
     problem_name = Path(args.config).stem
     writer_dir = Path(args.log_dir) / problem_name / f"seed-{seed}"
     writer_dir.mkdir(parents=True, exist_ok=True)
@@ -234,7 +223,23 @@ def train_single_seed(
         else:
             action = int(agent(state, pref_tensor, deterministic=False))
         next_state, reward_vec, done, info = env.step(action)
-        buffer.add(Experience(state, action, reward_vec, next_state, done, pref.copy()))
+        
+        # Create experience using the external repo's namedtuple structure
+        # Experience = namedtuple('Experience', ['state', 'action', 'reward', 'next_state','terminal', 'preference', 'step_idx', 'p_id', 'info'])
+        exp = ptan_experience.Experience(
+            state=state,
+            action=action,
+            reward=reward_vec,
+            next_state=next_state,
+            terminal=done,
+            preference=pref.copy(),
+            step_idx=0,  # Dummy value
+            p_id=0,      # Dummy value
+            info=[]      # Dummy value
+        )
+        # Populate expects a tuple of experiences (since we are mimicking the generator output)
+        buffer.populate((exp,))
+        
         state = next_state
         episode_reward += reward_vec
         episode_len += 1
@@ -298,16 +303,18 @@ def train_single_seed(
 
 def train(args: argparse.Namespace) -> None:
     _extend_sys_path(Path(args.pdmorl_root))
-    MO_DDQN, ptan_actions, ptan_agent = _import_pdmorl_modules()
+    MO_DDQN, ptan_actions, ptan_agent, ptan_experience = _import_pdmorl_modules()
     seed_list = args.seeds if args.seeds else [args.seed]
     for seed in seed_list:
         print(f"Starting training for seed {seed} on {Path(args.config).stem}")
-        train_single_seed(args, seed, MO_DDQN, ptan_actions, ptan_agent)
+        train_single_seed(args, seed, MO_DDQN, ptan_actions, ptan_agent, ptan_experience)
 
 
 def parse_args() -> argparse.Namespace:
     default_config = REPO_ROOT / "graphallocbench" / "config" / "problems" / "problem_0.yml"
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--config", type=str, default=str(default_config), help="Path to a GraphAlloc problem config.")
     parser.add_argument("--pdmorl-root", type=str, default=str(DEFAULT_PD_MORL_ROOT), help="Path to the PD-MORL repository root.")
     parser.add_argument("--total-steps", type=int, default=TrainingConfig.total_steps)

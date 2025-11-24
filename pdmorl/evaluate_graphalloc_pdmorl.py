@@ -138,8 +138,8 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
         eval_utils.calculate_ordering_score(
             env=ordering_env,
             model=ordering_adapter,
-            n_iter=5,
-            n_intervals=5,
+            # n_iter=5,
+            # n_intervals=5,
             random_seed=seed,
         )
     )
@@ -216,7 +216,9 @@ def _resolve_checkpoint_path(base_path: str, seed: int) -> Path:
 
 def parse_args() -> argparse.Namespace:
     default_config = REPO_ROOT / "graphallocbench" / "config" / "problems" / "problem_0.yml"
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--config", type=str, default=str(default_config), help="Problem configuration path.")
     parser.add_argument(
         "--checkpoint",
@@ -225,7 +227,7 @@ def parse_args() -> argparse.Namespace:
         help="Path (or template with {seed}) to a saved PD-MORL checkpoint.",
     )
     parser.add_argument("--pdmorl-root", type=str, default=str(DEFAULT_PD_MORL_ROOT))
-    parser.add_argument("--pref-grid-step", type=float, default=0.1)
+    parser.add_argument("--pref-grid-step", type=float, default=0.05)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--seed", type=int, default=0, help="Legacy single-seed flag (used when --seeds is omitted).")
     parser.add_argument(
@@ -237,10 +239,10 @@ def parse_args() -> argparse.Namespace:
     )
     default_output = DATA_DIR / "evaluation"
     parser.add_argument("--output", type=str, default="", help="Optional custom JSON output path.")
-    parser.add_argument("--tau", type=float, default=0.01)
+    parser.add_argument("--tau", type=float, default=0.005)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--gamma", type=float, default=0.99)
-    parser.add_argument("--batch-size", type=int, default=256)
+    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--layer-n", type=int, default=3)
     parser.add_argument("--hidden-size", type=int, default=256)
     parser.add_argument("--csv-output", type=str, default="", help="Optional path for the CSV metrics file.")
@@ -283,6 +285,26 @@ if __name__ == "__main__":
         "seeds": seed_list,
         "results": results,
     }
+    summary_keys = [
+        "hypervolume",
+        "normalized_hypervolume",
+        "percent_non_dominated",
+        "ordering_score",
+    ]
+    avg_metrics = {
+        key: float(np.mean([result[key] for result in results]))
+        for key in summary_keys
+        if results
+    }
+    if avg_metrics:
+        payload["average_metrics"] = avg_metrics
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2)
     print(f"Saved aggregated results to {out_path} and appended rows to the CSV metrics file")
+    if avg_metrics:
+        print(
+            "Average metrics across seeds | "
+            + " | ".join(
+                f"{key}={value:.4f}" for key, value in avg_metrics.items()
+            )
+        )

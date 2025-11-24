@@ -13,13 +13,13 @@ Utilities in this folder let you train and evaluate PD-MORL’s MO-DDQN-HER agen
 ## 1. Environment setup
 
 1. Install GraphAllocBench dependencies (e.g. `conda env create -f environment.yml && conda activate graphallocbench`).
-2. Initialize the PD-MORL submodule (needed once after cloning this repo):
+2. Initialize the PD-MORL submodule (CRITICAL - needed once after cloning this repo):
 
    ```bash
    git submodule update --init --recursive
    ```
 
-   This clones `https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm` into `pdmorl/external/…`. If you keep a different checkout elsewhere, pass `--pdmorl-root /path/to/PDMORL` when running the scripts.
+   This clones `https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm` into `pdmorl/external/…`. The training script directly imports modules from this submodule to ensure exact architectural compliance.
 
 ## 2. Training
 
@@ -59,7 +59,16 @@ Outputs:
 
 Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere. The `--checkpoint` flag accepts `{seed}` as a placeholder, so the command above automatically evaluates `seed-0` through `seed-4` when run with the default `--seeds 0 1 2 3 4`. If you only want a single seed, pass an explicit checkpoint path without `{seed}` (or override `--seeds`).
 
-## 4. Tips
+## 4. Implementation Details
+
+This implementation strictly follows the architecture defined in the [PD-MORL repository](https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm):
+
+1.  **Network Architecture**: Uses the `MO_DDQN` network directly from the submodule.
+2.  **Inputs**: The state `s` (allocation + requirements) and preference `w` are fed into the network separately. The preference vector is **not** duplicated in the state vector.
+3.  **Replay Buffer**: Uses `ExperienceReplayBuffer_HER_MO` from the submodule (Hindsight Experience Replay with uniform sampling). It does **not** use Prioritized Experience Replay (PER), matching the reference implementation.
+4.  **Exploration**: Uses `EpsilonGreedyActionSelector` with linear decay.
+
+## 5. Tips
 
 - To compare against official baselines, copy `graphallocbench/examples/data/GraphAllocBench-v2` into `pdmorl/data/` so normalized hypervolume uses the same reference.
 - `OrderingPolicyAdapter` exposes the PD-MORL policy through a Stable-Baselines-style API, enabling `graphallocbench.evaluation` to call it without modifications.
