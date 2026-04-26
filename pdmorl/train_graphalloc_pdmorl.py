@@ -63,6 +63,12 @@ def _import_pdmorl_modules():  # pragma: no cover - thin wrapper around imports
     return MO_DDQN, ptan_actions, ptan_agent, ptan_experience
 
 
+class _NoOpWriter:
+    """Drop-in replacement for SummaryWriter that writes nothing."""
+    def add_scalar(self, *args, **kwargs): pass
+    def close(self): pass
+
+
 def sample_preference(rng: np.random.Generator, n_objectives: int, alpha: float) -> np.ndarray:
     pref = rng.dirichlet(np.ones(n_objectives) * alpha).astype(np.float32)
     return pref / pref.sum()
@@ -198,9 +204,12 @@ def train_single_seed(
     buffer = ptan_experience.ExperienceReplayBuffer_HER_MO(None, algo_args)
     
     problem_name = Path(args.config).stem
-    writer_dir = Path(args.log_dir) / problem_name / f"seed-{seed}"
-    writer_dir.mkdir(parents=True, exist_ok=True)
-    writer = SummaryWriter(str(writer_dir))
+    if getattr(args, "save_logs", True):
+        writer_dir = Path(args.log_dir) / problem_name / f"seed-{seed}"
+        writer_dir.mkdir(parents=True, exist_ok=True)
+        writer = SummaryWriter(str(writer_dir))
+    else:
+        writer = _NoOpWriter()
     env.set_episode_preference(sample_preference(rng, env.n_objectives, args.dirichlet_alpha))
     state = env.reset()
     episode_reward = np.zeros(env.n_objectives, dtype=np.float32)
@@ -266,20 +275,21 @@ def train_single_seed(
             writer.add_scalar("eval/normalized_hypervolume", metrics["normalized_hypervolume"], step)
             writer.add_scalar("eval/percent_non_dominated", metrics["percent_non_dominated"], step)
             writer.add_scalar("eval/ordering_score", metrics["ordering_score"], step)
-            save_path = save_checkpoint(
-                agent.net,
-                Path(args.save_dir),
-                step,
-                problem_name,
-                seed,
-                args,
-            )
+            out_dir = Path(args.save_dir) / problem_name / f"seed-{seed}"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            if getattr(args, "save_checkpoints", True):
+                checkpoint_path = save_checkpoint(
+                    agent.net, Path(args.save_dir), step, problem_name, seed, args
+                )
+                checkpoint_ref = str(checkpoint_path)
+            else:
+                checkpoint_ref = ""
             serializable_metrics = {
                 k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in metrics.items()
             }
-            metrics_path = save_path.parent / f"metrics_step_{step}.json"
+            metrics_path = out_dir / f"metrics_step_{step}.json"
             with open(metrics_path, "w", encoding="utf-8") as fh:
-                json.dump({"step": step, **serializable_metrics, "checkpoint": str(save_path)}, fh, indent=2)
+                json.dump({"step": step, **serializable_metrics, "checkpoint": checkpoint_ref}, fh, indent=2)
             tqdm.write(
                 f"[seed={seed} step={step}] HV={metrics['hypervolume']:.4f} | "
                 f"NormHV={metrics['normalized_hypervolume']:.4f} | "
@@ -289,15 +299,11 @@ def train_single_seed(
 
     elapsed_min = (time.time() - start_time) / 60
     tqdm.write(f"[seed={seed}] Training completed in {elapsed_min:.2f} minutes.")
-    final_path = save_checkpoint(
-        agent.net,
-        Path(args.save_dir),
-        args.total_steps,
-        problem_name,
-        seed,
-        args,
-    )
-    tqdm.write(f"[seed={seed}] Final checkpoint saved to {final_path}")
+    if getattr(args, "save_checkpoints", True):
+        final_path = save_checkpoint(
+            agent.net, Path(args.save_dir), args.total_steps, problem_name, seed, args
+        )
+        tqdm.write(f"[seed={seed}] Final checkpoint saved to {final_path}")
     writer.close()
 
 

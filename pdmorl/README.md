@@ -5,10 +5,12 @@ Utilities in this folder let you train and evaluate PD-MORL’s MO-DDQN-HER agen
 ## Layout
 
 - `common.py` – shared environment wrapper, observation flattening, preference adapters, and compatibility shims.
-- `train_graphalloc_pdmorl.py` – training entrypoint.
+- `train_graphalloc_pdmorl.py` – single-configuration training entrypoint.
 - `evaluate_graphalloc_pdmorl.py` – checkpoint evaluator plus CSV/JSON exporters.
+- `sweep_pdmorl.py` – **comprehensive hyperparameter search** for PD-MORL (random search, per-problem best-config selection, full multi-seed training, paper-ready summary table).
 - `external/PDMORL-…` – git submodule pointing to the upstream PD-MORL repo.
 - `checkpoints/`, `runs/`, `data/` – default output directories for artifacts produced by the scripts.
+- `checkpoints_sweep/`, `runs_sweep/` – temporary directories used by the sweep search phase.
 
 ## 1. Environment setup
 
@@ -21,7 +23,73 @@ Utilities in this folder let you train and evaluate PD-MORL’s MO-DDQN-HER agen
 
    This clones `https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm` into `pdmorl/external/…`. The training script directly imports modules from this submodule to ensure exact architectural compliance.
 
-## 2. Training
+## 2. Comprehensive hyperparameter search (recommended for paper comparisons)
+
+The `sweep_pdmorl.py` script runs a random hyperparameter search over the
+search space below and then trains the winning configuration for multiple seeds,
+producing results comparable to the PCPL hyperparameter sweep.
+
+**Search space** (randomly sampled per trial):
+
+| Hyperparameter | Values |
+|---|---|
+| Learning rate | 1e-4, 3e-4, 6e-4, 1e-3 |
+| Gamma | 0.95, 0.99 |
+| Batch size | 32, 64, 128, 256 |
+| Tau | 0.001, 0.005, 0.01, 0.05 |
+| Buffer size | 5 000, 10 000, 20 000 |
+| Epsilon start | 0.5, 0.8, 1.0 |
+| Epsilon decay steps | 100 000, 200 000 |
+| Weight batch | 3, 5, 7 |
+| Training steps | 500 000, 1 000 000 |
+
+**Step 1 – search** (one training seed per trial; step budget sampled per trial):
+
+```bash
+python pdmorl/sweep_pdmorl.py search \
+    --problems 0 1a 1b 1c 2a 2b 2c 3a 3b 4a 4b 5a 5b 5c 5d 5e \
+    --trials 10
+```
+
+Per-trial results are written to `pdmorl/data/sweep/<problem>_search.csv`.
+The best config per problem is saved to `pdmorl/data/sweep/best_configs.json`.
+Trials are resumable: re-running the command skips already-completed trials.
+
+**Step 2 – inspect** the best configuration found per problem:
+
+```bash
+python pdmorl/sweep_pdmorl.py report
+```
+
+**Step 3 – full training** with best hyperparameters across 5 seeds:
+
+```bash
+python pdmorl/sweep_pdmorl.py train \
+    --problems 0 1a 1b 1c 2a 2b 2c 3a 3b 4a 4b 5a 5b 5c 5d 5e \
+    --seeds 0 1 2 3 4
+```
+
+Checkpoints go to `pdmorl/checkpoints/<problem>/seed-<seed>/` and metrics are
+appended to `pdmorl/data/pdmorl_stats.csv`, keeping the file compatible with
+`evaluate_graphalloc_pdmorl.py` and `plot.py`.
+
+**Step 4 – summary table** (Markdown, mirrors paper Table 4):
+
+```bash
+python pdmorl/sweep_pdmorl.py summarize
+```
+
+Prints both a detailed table (mean ± std) and a compact version matching the
+paper's Table 4 format. Saves the detailed table to
+`pdmorl/data/sweep/comparison_table.md`.
+
+Pass `--help` to any subcommand for the full option list:
+
+```bash
+python pdmorl/sweep_pdmorl.py search --help
+```
+
+## 3. Single-configuration training
 
 ```bash
 python pdmorl/train_graphalloc_pdmorl.py \
@@ -39,14 +107,14 @@ Key behaviours:
 
 Override hyperparameters via CLI flags (see `python pdmorl/train_graphalloc_pdmorl.py --help`). The script defaults to 1M training steps, so pass `--total-steps` if you want shorter smoke tests. Defaults target CUDA (`--device cuda`).
 
-## 3. Evaluation
+## 4. Evaluation
 
 Evaluate any checkpoint across multiple seeds (defaults to 0–4) and export both JSON + CSV summaries:
 
 ```bash
 python pdmorl/evaluate_graphalloc_pdmorl.py \
   --config graphallocbench/config/problems/problem_0.yml \
-  --checkpoint "pdmorl/checkpoints/problem_0/seed-{seed}/ddqn_step_1000000.pt" \
+  --checkpoint "pdmorl/checkpoints/problem_0/seed-{seed}/ddqn_step_500000.pt" \
   --device cuda
 ```
 
@@ -59,7 +127,7 @@ Outputs:
 
 Pass `--seeds` to control the exact seed list or `--csv-output` to write metrics elsewhere. The `--checkpoint` flag accepts `{seed}` as a placeholder, so the command above automatically evaluates `seed-0` through `seed-4` when run with the default `--seeds 0 1 2 3 4`. If you only want a single seed, pass an explicit checkpoint path without `{seed}` (or override `--seeds`).
 
-## 4. Implementation Details
+## 5. Implementation Details
 
 This implementation strictly follows the architecture defined in the [PD-MORL repository](https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm):
 
@@ -68,7 +136,7 @@ This implementation strictly follows the architecture defined in the [PD-MORL re
 3.  **Replay Buffer**: Uses `ExperienceReplayBuffer_HER_MO` from the submodule (Hindsight Experience Replay with uniform sampling). It does **not** use Prioritized Experience Replay (PER), matching the reference implementation.
 4.  **Exploration**: Uses `EpsilonGreedyActionSelector` with linear decay.
 
-## 5. Tips
+## 6. Tips
 
 - To compare against official baselines, copy `graphallocbench/examples/data/GraphAllocBench-v2` into `pdmorl/data/` so normalized hypervolume uses the same reference.
 - `OrderingPolicyAdapter` exposes the PD-MORL policy through a Stable-Baselines-style API, enabling `graphallocbench.evaluation` to call it without modifications.

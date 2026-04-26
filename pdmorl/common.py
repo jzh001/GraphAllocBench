@@ -186,7 +186,7 @@ def ensure_pymoo_factory() -> None:
 
 @dataclass
 class TrainingConfig:
-    total_steps: int = 1_000_000
+    total_steps: int = 2_000_000
     batch_size: int = 32
     buffer_size: int = 10_000
     start_steps: int = 64

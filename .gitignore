@@ -9,3 +9,6 @@
 **/graphallocbench.egg-info/
 **/runs/
 **/checkpoints/
+**/runs_sweep/
+**/checkpoints_sweep/
+**/archive/
