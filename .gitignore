@@ -12,3 +12,6 @@
 **/runs_sweep/
 **/checkpoints_sweep/
 **/archive/
+.DS_Store
+**/.DS_Store
+.claude/

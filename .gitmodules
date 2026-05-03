@@ -1,3 +1,6 @@
 [submodule "pdmorl/external/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm"]
 	path = pdmorl/external/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm
 	url = https://github.com/tbasaklar/PDMORL-Preference-Driven-Multi-Objective-Reinforcement-Learning-Algorithm
+[submodule "envelope/external/MORL"]
+	path = envelope/external/MORL
+	url = https://github.com/RunzheYang/MORL

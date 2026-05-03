@@ -211,7 +211,7 @@ def _train_agent(gpu_id=None):
         clip_range=config["clip_range"],
         seed=config['seed']
     )
-    model.learn(total_timesteps=config['total_timesteps'], callback=WandbTrainingCallback(save_path=None))
+    model.learn(total_timesteps=config['sweep_timesteps'], callback=WandbTrainingCallback(save_path=None))
     stats = calculate_stats(env, model)
     wandb.log(stats)
     stats.update({key: config[key] for key in config.keys()})

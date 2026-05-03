@@ -1,4 +1,4 @@
-hypervolume,normalized_hv,non_dominated,ordering,architecture_idx,clip_range,entropy,env_name,lr,n_epochs,n_steps,scalarization_method,seed,smoothness,target_kl,total_timesteps,wandb_run_name
+hypervolume,normalized_hv,non_dominated,ordering,architecture_idx,clip_range,entropy,env_name,lr,n_epochs,n_steps,scalarization_method,seed,smoothness,target_kl,sweep_timesteps,wandb_run_name
 144.18304254747147,0.6796258529028523,1.0,0.9010723990683228,0,0.23619145893190596,0.12140875157625386,problem_1a,7.275982680560301e-05,20,2048,smooth_tchebycheff,42,0.04947027315114122,0.01679945363203166,200000,rural-sweep-4
 137.0912600515934,0.6461977975490073,0.6666666666666666,1.0,0,0.2139822653015068,0.031001726309267855,problem_1a,9.485314772536808e-05,20,2048,smooth_tchebycheff,42,0.06454987143208765,0.026381974069711277,200000,comic-sweep-2
 150.22999487749865,0.7081289629922688,0.7777777777777778,1.0,0,0.08205447168210121,0.13951546702769077,problem_1a,6.0517687747627054e-05,20,2048,smooth_tchebycheff,42,0.050156571492550185,0.0184321864633347,200000,dazzling-sweep-1

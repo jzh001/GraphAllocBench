@@ -55,16 +55,19 @@ All values are mean ± population std over 5 independent seeds.
 
 ---
 
-## Problem Categories
+## Problem Set Description
 
-| Category | Problems | Challenge |
-|----------|----------|-----------|
-| Baseline | 0 | Smooth convex Pareto front, low complexity |
-| Oscillatory | 1a–1c | Multi-segment / oscillatory objective landscapes, sparse rewards |
-| Large demand set | 2a–2c | Increased number of demands, expanded action/observation spaces |
-| Multi-objective | 3a–3b | 5-objective problems with highly sparse reward signals |
-| Partial connectivity | 4a–4b | Non-fully-connected dependency graphs |
-| Random structure | 5a–5e | Randomly sampled dependency structures and objectives, extended horizons |
+| Problems | \|P\| | N | FC | Description |
+|----------|-------|---|----|-------------|
+| 0 | 2 | 2 | Yes | Baseline simple logarithmic objective functions with smooth convex Pareto Fronts. The baseline problem uses a Fully-Connected (FC) dependency graph, where every demand depends on every resource. |
+| 1a–1c | 2 | 2 | Yes | Difficult objective functions, including oscillatory behavior, stationary rewards, and spikes. |
+| 2a–2c | 5 | 2 | Yes | More demands, which increases the action and observation spaces. |
+| 3a–3b | 5 | 5 | Yes | 5 objectives with sparse rewards, building on difficult objective functions from previous testcases. |
+| 4a–4b | 5 | 5 | No | Varied dependencies and resources, instead of Fully-Connected (FC) dependency graphs. |
+| 5a–5e | 5 | 3–5 | No | Testcases with dependencies, resources, and objectives sampled randomly. Extended horizon for allocating more available resources. |
+| 6a–6c | 100 | 5 | No | Random testcases with simple convex functions similar to baseline, but with more complex graph structures with 100 demands. The ideal Pareto Front is not computed due to computational complexity. |
+
+*\|P\| = number of objectives, N = number of demands, FC = fully-connected dependency graph. For more detailed problem definitions, refer to Appendix E (Table 2) of the paper.*
 
 ---
 

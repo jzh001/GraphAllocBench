@@ -31,7 +31,7 @@ parameters:
     # - augmented_tchebycheff
     # - smooth_tchebycheff
     # - pbi
-  total_timesteps:
+  sweep_timesteps:
     value: 200000
   env_name:
     value: problem_0

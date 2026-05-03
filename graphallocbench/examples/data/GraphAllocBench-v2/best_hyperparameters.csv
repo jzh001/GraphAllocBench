@@ -1,4 +1,4 @@
-env_name,hypervolume,normalized_hv,non_dominated,ordering,architecture_idx,clip_range,entropy,lr,n_epochs,n_steps,scalarization_method,seed,smoothness,target_kl,total_timesteps,wandb_run_name
+env_name,hypervolume,normalized_hv,non_dominated,ordering,architecture_idx,clip_range,entropy,lr,n_epochs,n_steps,scalarization_method,seed,smoothness,target_kl,sweep_timesteps,wandb_run_name
 problem_0,443.44769822319495,0.9893416457125384,1.0,1.0,0,0.2266050428620163,0.0054618806457684,5.341764167717242e-05,20,2048,smooth_tchebycheff,42,0.0190414056698512,0.0134512810628294,200000,morning-sweep-28
 problem_1a,190.69288962270124,0.8988561724217172,0.7777777777777778,0.8995690304125263,0,0.14883491382189,0.0998128803564572,9.383349799115234e-05,20,2048,smooth_tchebycheff,42,0.0762661124956977,0.0112097023491569,200000,proud-sweep-37
 problem_1b,62.26620307207005,0.7739018077812673,1.0,0.967013888888889,0,0.0872684119785699,0.0034058729051488,9.897950949399806e-05,20,2048,smooth_tchebycheff,42,0.0733333662272275,0.0156189898631832,200000,charmed-sweep-16
