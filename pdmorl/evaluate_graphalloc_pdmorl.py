@@ -81,13 +81,9 @@ def make_algo_namespace(env: GraphAllocDiscreteEnv, args: argparse.Namespace) ->
     return algo_args, device
 
 
-def prepare_preferences(step: float, n_objectives: int) -> np.ndarray:
-    grid = np.arange(0, 1 + step, step)
-    mesh = np.array(np.meshgrid(*([grid] * n_objectives))).T.reshape(-1, n_objectives)
-    mesh = mesh[np.isclose(mesh.sum(axis=1), 1.0)]
-    if len(mesh) == 0:
-        mesh = np.eye(n_objectives, dtype=np.float32)
-    return mesh.astype(np.float32)
+def prepare_preferences(step: float, n_objectives: int, n_partitions: int = 12) -> np.ndarray:
+    from pymoo.util.ref_dirs import get_reference_directions
+    return get_reference_directions("das-dennis", n_objectives, n_partitions=n_partitions).astype(np.float32)
 
 
 def build_agent(args: argparse.Namespace, env: GraphAllocDiscreteEnv, checkpoint_path: Path):
@@ -124,7 +120,7 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
         model=ordering_adapter,
         preferences=preferences,
         deterministic=True,
-        random_seed=seed,
+        random_seed=42,
     )
     objectives = np.asarray(final_objectives, dtype=np.float32)
     hv = float(eval_utils.calculate_hypervolume(objectives))
@@ -138,9 +134,7 @@ def evaluate(agent, config_path: str, preferences: np.ndarray, device: torch.dev
         eval_utils.calculate_ordering_score(
             env=ordering_env,
             model=ordering_adapter,
-            # n_iter=5,
-            # n_intervals=5,
-            random_seed=seed,
+            random_seed=42,
         )
     )
     return {

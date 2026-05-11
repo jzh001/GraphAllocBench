@@ -102,12 +102,9 @@ def make_algo_namespace(env: GraphAllocDiscreteEnv, args: argparse.Namespace) ->
 
 
 def prepare_preferences(args: argparse.Namespace, n_objectives: int) -> np.ndarray:
-    grid = np.arange(0, 1 + args.pref_grid_step, args.pref_grid_step)
-    mesh = np.array(np.meshgrid(*([grid] * n_objectives))).T.reshape(-1, n_objectives)
-    mesh = mesh[np.isclose(mesh.sum(axis=1), 1.0)]
-    if len(mesh) == 0:
-        mesh = np.eye(n_objectives, dtype=np.float32)
-    return mesh.astype(np.float32)
+    from pymoo.util.ref_dirs import get_reference_directions
+    n_partitions = getattr(args, "n_partitions", 12)
+    return get_reference_directions("das-dennis", n_objectives, n_partitions=n_partitions).astype(np.float32)
 
 
 def evaluate_agent(
@@ -126,7 +123,7 @@ def evaluate_agent(
         model=ordering_adapter,
         preferences=preferences,
         deterministic=True,
-        random_seed=seed,
+        random_seed=42,
     )
     objectives = np.asarray(final_objectives, dtype=np.float32)
     hv = float(eval_utils.calculate_hypervolume(objectives))
@@ -140,9 +137,7 @@ def evaluate_agent(
         eval_utils.calculate_ordering_score(
             env=ordering_env,
             model=ordering_adapter,
-            n_iter=5,
-            n_intervals=5,
-            random_seed=seed,
+            random_seed=42,
         )
     )
     return {
