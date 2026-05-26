@@ -18,8 +18,8 @@ def calculate_hypervolume(objectives):
     return hypervolume_fn(objectives)
 
 def calculate_non_dominated(objectives):
-
-    fronts = NonDominatedSorting().do(objectives, only_non_dominated_front=False)
+    # Negate objectives: NonDominatedSorting uses minimization, but objectives are maximized.
+    fronts = NonDominatedSorting().do(-np.array(objectives), only_non_dominated_front=False)
     num_non_dominated = len(fronts[0])
     total = len(objectives)
 

@@ -26,10 +26,18 @@ def train(training_config_path, project_name='GraphAllocBench-v2', device='cuda'
     save_path = f"models/{project_name}/arch-{training_config['architecture_idx']}/{training_config['env_name']}/{seed}"
     env.spec = SimpleNamespace(id='CityPlannerEnv-v0')
     run_name = f"config-{training_config['env_name']}"
-    wandb.init(project=run_name)
+    # reinit + explicit finish: pool workers are reused across (problem, seed)
+    # tasks, so without this a second wandb.init() in the same process keeps
+    # logging to the first run, leaking later problems' metrics into it.
+    run = wandb.init(
+        project=run_name,
+        name=f"{training_config['env_name']}-seed{seed}",
+        config={**training_config, "seed": seed},
+        reinit=True,
+    )
     model = PPO("MultiInputPolicy",
                 device=device,
-                env=env, 
+                env=env,
                 verbose=0,
                 ent_coef=training_config['entropy'],
                 policy_kwargs=architectures[training_config["architecture_idx"]],
@@ -40,8 +48,11 @@ def train(training_config_path, project_name='GraphAllocBench-v2', device='cuda'
                 clip_range=training_config["clip_range"],
                 seed = seed
                 )
-    model.learn(total_timesteps=training_config['total_timesteps'], 
-                callback=WandbTrainingCallback(save_path))
+    try:
+        model.learn(total_timesteps=training_config['total_timesteps'],
+                    callback=WandbTrainingCallback(save_path))
+    finally:
+        run.finish()
 
 def train_wrapper(config_path, project_name, device, seed=42):
     try:
