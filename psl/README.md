@@ -58,6 +58,8 @@ reward. The outer objective is `max_φ E_{ω~Λ}[u(J, ω)]`.
 
 ## Running
 
+### Single problem
+
 ```bash
 # Default (linear scalarization, faithful to the paper)
 uv run python psl/train_graphalloc_psl.py \
@@ -70,12 +72,52 @@ uv run python psl/train_graphalloc_psl.py \
     --scalarization smooth_tchebycheff --seeds 0
 ```
 
+### All problems with a progress bar (sweep)
+
+`psl/sweep_psl.py` mirrors `pdmorl/sweep_pdmorl.py` /
+`envelope/sweep_envelope.py` — a four-stage `search → report → train → summarize`
+workflow. With `--workers > 1` it shows a single top-level progress bar across all
+runs (per-step bars are suppressed); with `--workers 1` it runs sequentially with
+the per-step bars visible.
+
+```bash
+# 1. Random hyperparameter search (one seed per trial, per problem)
+uv run python psl/sweep_psl.py search --trials 10 --workers 4
+
+# 2. Inspect the best config found per problem
+uv run python psl/sweep_psl.py report
+
+# 3. Train the best per-problem config across seeds (uses the search results)
+uv run python psl/sweep_psl.py train --seeds 0 1 2 3 4 --workers 4
+
+# 4. Aggregate per-seed results into a mean ± std table
+uv run python psl/sweep_psl.py summarize
+```
+
+The search space (lr, gamma, batch size, tau, buffer size, ε-start, ε-decay,
+hidden size, step budget) is defined in `SEARCH_SPACE` in `sweep_psl.py`. Useful
+flags:
+
+- `--problems 0 1c 3b` — restrict to a subset (default: all of 0–5).
+- `--scalarization {linear,smooth_tchebycheff}` — applies to every trial/run;
+  search results are stored separately per scalarization.
+- `--search-steps N` — override each trial's sampled step budget for a faster
+  search.
+- `train --allow-defaults` — train with `PSLTrainingConfig` defaults if you want to
+  skip the search phase entirely.
+
+Both `search` and `train` are **resumable** — re-running skips trials / (problem,
+seed) pairs already recorded in the CSVs.
+
 ### Outputs
 
 - Checkpoints: `psl/checkpoints/<problem>/seed-<n>/psl_step_<step>.pt`
 - Per-eval metrics: `psl/checkpoints/<problem>/seed-<n>/metrics_step_<step>.json`
   (HV, normalized HV, PNDS, ordering score)
 - TensorBoard logs: `psl/runs/<problem>/seed-<n>/`
+- Sweep (`sweep_psl.py`): per-trial CSVs and `best_configs_<scalarization>.json`
+  under `psl/data/sweep/`; per-seed `train` rows in `psl/data/psl_stats.csv`;
+  summary table in `psl/data/psl_summary.md`.
 
 Evaluation reuses the official metric implementations
 ([`graphallocbench/evaluation/utils.py`](../graphallocbench/evaluation/utils.py)),
