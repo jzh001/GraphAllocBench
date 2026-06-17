@@ -15,12 +15,42 @@ We include an example PCPL setup using Stable Baselines3 PPO paired with a Smoot
 
 ## Quick Start
 
-This package requires **Python 3.10 or higher**.
+This package requires **Python 3.10 or higher** and uses [uv](https://docs.astral.sh/uv/)
+for package management.
 
-### Installation (Local Editable)
+### Installation (uv)
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) if you don't
+have it, then from the repository root:
+
 ```bash
-pip install -e .
+uv sync          # creates a managed .venv, resolves dependencies, writes uv.lock
 ```
+
+This installs `graphallocbench` (editable) together with all dependencies into a
+project-local virtual environment. Run any command inside that environment with
+`uv run`:
+
+```bash
+uv run python -c "import graphallocbench; print('ok')"
+```
+
+> Prefer a classic editable install instead? `uv pip install -e .` (after
+> `uv venv`) also works, but `uv sync` is recommended for a reproducible lockfile.
+
+### Pulling baseline submodules
+
+The PD-MORL and Envelope Q-Learning baselines depend on external repositories
+vendored under `pdmorl/external/` and `envelope/external/`. Fetch them with:
+
+```bash
+git submodule update --init --recursive          # PD-MORL
+git clone https://github.com/RunzheYang/MORL envelope/external/MORL   # Envelope
+```
+
+(The Envelope repository is referenced in `.gitmodules` but is not committed as a
+gitlink, so it is cloned directly into the expected path.) These are **not** needed
+to run PCPL-PPO or the PSL baseline.
 
 ### Example Usage
 
@@ -34,6 +64,28 @@ print(env.action_space, env.observation_space)
 ```
 
 More examples can be found in `graphallocbench/examples/*`.
+
+### Training & Evaluating
+
+Train and evaluate the PCPL-PPO agent on a single problem (run via `uv run`):
+
+```bash
+uv run python train.py    --problems problem_0 --seeds 0 --workers 1 --wandb-mode disabled
+uv run python evaluate.py --problems problem_0 --seeds 0
+```
+
+Omit `--problems` to run the full benchmark, add `--gnn` for the large 100×100
+graph problems (6a–6c), and use `--seeds 0 1 2 3 4` for multi-seed runs.
+
+### Baselines
+
+Three algorithmic baselines are provided for comparison:
+
+- **PD-MORL** (`pdmorl/`) — `uv run python pdmorl/train_graphalloc_pdmorl.py --config graphallocbench/config/problems/problem_0.yml`
+- **Envelope Q-Learning** (`envelope/`) — `uv run python envelope/train_graphalloc_envelope.py --config graphallocbench/config/problems/problem_0.yml`
+- **PSL (Pareto Set Learning)** (`psl/`) — `uv run python psl/train_graphalloc_psl.py --config graphallocbench/config/problems/problem_0.yml`
+
+See [psl/README.md](psl/README.md) for details on the PSL baseline.
 
 ## Components
 

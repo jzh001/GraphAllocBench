@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "graphallocbench"
 version = "0.1.0"
 description = "GraphAllocBench: A flexible benchmark suite and environment for Preference-Conditioned Multi-Objective Policy Learning."
-readme = "README_GRAPHALLOCBENCH.md"
+readme = "README.md"
 license = {text = "MIT"}
 authors = [
   {name = "GraphAllocBench Contributors"}
