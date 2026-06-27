@@ -90,6 +90,8 @@ SEARCH_SPACE: Dict[str, List] = {
     "epsilon_decay": [100_000, 200_000],
     "hidden_size":   [128, 256],
     "total_steps":   [500_000, 1_000_000],
+    # Only sampled when scalarization == "smooth_tchebycheff"; fixed at default otherwise.
+    "smoothness":    [0.001, 0.01, 0.05, 0.1],
 }
 
 _HPARAM_KEYS = list(SEARCH_SPACE.keys())
@@ -136,8 +138,14 @@ def _resolve_device(requested: str) -> str:
     return requested
 
 
-def _sample_hyperparams(rng: random.Random) -> Dict:
-    return {key: rng.choice(values) for key, values in SEARCH_SPACE.items()}
+def _sample_hyperparams(rng: random.Random, scalarization: str = "linear") -> Dict:
+    hparams = {key: rng.choice(values) for key, values in SEARCH_SPACE.items()
+               if key != "smoothness"}
+    if scalarization == "smooth_tchebycheff":
+        hparams["smoothness"] = rng.choice(SEARCH_SPACE["smoothness"])
+    else:
+        hparams["smoothness"] = PSLTrainingConfig().smoothness
+    return hparams
 
 
 def _default_hparams() -> Dict:
@@ -152,6 +160,7 @@ def _default_hparams() -> Dict:
         "epsilon_decay": cfg.epsilon_decay_steps,
         "hidden_size": cfg.hidden_size,
         "total_steps": cfg.total_steps,
+        "smoothness": cfg.smoothness,
     }
 
 
@@ -365,7 +374,8 @@ def _run_trial_worker(spec: Dict) -> Dict:
             spec["config_path"], spec["hparams"],
             total_steps=steps, eval_interval=steps, seed=spec["seed"],
             save_dir=spec["save_dir"], log_dir=spec["log_dir"], device=spec["device"],
-            scalarization=spec["scalarization"], smoothness=spec["smoothness"],
+            scalarization=spec["scalarization"],
+            smoothness=float(spec["hparams"].get("smoothness", spec["smoothness"])),
             n_partitions=spec["n_partitions"], save_checkpoints=False, save_logs=False,
         )
         metrics = _run_training(train_args, seed=spec["seed"])
@@ -408,7 +418,7 @@ def cmd_search(args: Namespace) -> None:
             if (problem, trial_idx) in completed:
                 continue
             trial_rng = random.Random(args.search_seed * 10_000 + trial_idx)
-            hparams = _sample_hyperparams(trial_rng)
+            hparams = _sample_hyperparams(trial_rng, args.scalarization)
             if args.search_steps:
                 # Override the sampled budget (useful for fast searches / smoke tests).
                 hparams["total_steps"] = args.search_steps
@@ -518,6 +528,7 @@ def _coerce_hparams(raw_cfg: Optional[Dict], fallback_steps: int) -> Dict:
         "epsilon_decay": int(float(raw_cfg["epsilon_decay"])),
         "hidden_size": int(float(raw_cfg.get("hidden_size", 128))),
         "total_steps": int(float(raw_cfg.get("total_steps", fallback_steps))),
+        "smoothness": float(raw_cfg.get("smoothness", PSLTrainingConfig().smoothness)),
     }
 
 
@@ -601,7 +612,8 @@ def cmd_train(args: Namespace) -> None:
                 total_steps=steps, eval_interval=steps, seed=seed,
                 save_dir=str(CANONICAL_CKPT_DIR),
                 log_dir=str(SCRIPT_DIR / "runs" / f"problem_{problem}"),
-                device=args.device, scalarization=args.scalarization, smoothness=args.smoothness,
+                device=args.device, scalarization=args.scalarization,
+                smoothness=float(hparams.get("smoothness", args.smoothness)),
                 n_partitions=args.n_partitions,
                 save_checkpoints=not args.no_checkpoints, save_logs=not args.no_logs,
             )

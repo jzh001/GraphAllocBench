@@ -15,3 +15,6 @@
 .DS_Store
 **/.DS_Store
 .claude/
+
+# Directly-cloned Envelope Q-Learning baseline (see README); not committed.
+envelope/external/
